@@ -77,7 +77,7 @@ tbody tr:hover{background:#f5f9fc;cursor:pointer}
 <header class="topbar">
   <div>
     <div class="title">Mapa Territorial · Rafa Loera · Chihuahua</div>
-    <div class="subtitle">Publicidad, líderes, colonias y distritos · MapLibre + OpenFreeMap <span class="version">· v7</span></div>
+    <div class="subtitle">Publicidad, líderes, colonias y distritos · MapLibre + OpenFreeMap <span class="version">· v8 capas corregidas</span></div>
   </div>
   <div class="kpis">
     <div class="kpi"><div class="n" id="kTotal">763</div><div class="l">Registros filtrados</div></div>
@@ -301,7 +301,7 @@ function currentPointGeoJSON(items){
   return {type:"FeatureCollection",features:items.filter(x=>hasCoord(x.r)).map(({r,idx})=>pointFeature(r,idx))};
 }
 function addOperationalLayers(){
-  if(!map||!map.isStyleLoaded())return;
+  if(!map)return;
 
   if(map.getSource("districts"))map.removeSource("districts");
   if(map.getSource("colonies"))map.removeSource("colonies");
@@ -395,6 +395,13 @@ function addOperationalLayers(){
   map.on("mouseleave","unclustered-point",()=>map.getCanvas().style.cursor="");
 
   applyFilters(false);
+
+  // Confirmación de que las capas operativas ya existen.
+  console.info("Capas cargadas:",
+    currentFiltered.filter(x=>hasCoord(x.r)).length,
+    "puntos; distritos:", DISTRITOS.features.length,
+    "colonias:", COLONIAS.features.length
+  );
 }
 function fitItems(items){
   if(!map||!document.getElementById("autoFit").checked)return;
@@ -527,8 +534,19 @@ async function initMap(){
 
     map.on("style.load",()=>{
       mapReady=true;
-      addOperationalLayers();
-      document.getElementById("loading").style.display="none";
+      // Esperamos un instante para que MapLibre termine de registrar completamente el estilo.
+      setTimeout(()=>{
+        try{
+          addOperationalLayers();
+          document.getElementById("loading").style.display="none";
+          const w=document.getElementById("warning");
+          w.style.display="none";
+        }catch(err){
+          document.getElementById("loading").style.display="none";
+          showWarning("<b>El mapa base cargó, pero hubo un problema al dibujar las capas de trabajo.</b><br>"+esc(err?.message||err));
+          console.error("Error cargando capas:",err);
+        }
+      },80);
     });
 
     map.on("error",e=>{
