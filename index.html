@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mapa Territorial · Rafa Loera · Chihuahua</title>
+<title>Mapa Territorial de Chihuahua, Rafa Loera</title>
 
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
@@ -19,7 +19,7 @@ html,body{height:100%;margin:0;font-family:Segoe UI,Arial,sans-serif;color:var(-
 .app{height:100%;display:grid;grid-template-rows:auto 1fr}
 .topbar{background:linear-gradient(100deg,#103b61,#1a5c8d);color:#fff;padding:9px 13px;
 display:grid;grid-template-columns:minmax(280px,1fr) auto;gap:10px;align-items:center;box-shadow:0 2px 10px #0002;z-index:10}
-.title{font-weight:800;font-size:18px}.subtitle{font-size:10px;opacity:.9;margin-top:2px}.version{opacity:.72}
+.title{font-weight:800;font-size:19px;letter-spacing:.1px}.subtitle{display:none}.version{display:none}
 .kpis{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .kpi{background:#ffffff15;border:1px solid #ffffff30;border-radius:9px;padding:6px 10px;min-width:87px;text-align:center}
 .kpi .n{font-size:16px;font-weight:800}.kpi .l{font-size:8px;text-transform:uppercase;opacity:.9}
@@ -76,15 +76,15 @@ tbody tr:hover{background:#f5f9fc;cursor:pointer}
 <div class="app">
 <header class="topbar">
   <div>
-    <div class="title">Mapa Territorial · Rafa Loera · Chihuahua</div>
-    <div class="subtitle">Publicidad, líderes, colonias y distritos · MapLibre + OpenFreeMap <span class="version">· v8 capas corregidas</span></div>
+    <div class="title">Mapa Territorial de Chihuahua, Rafa Loera</div>
   </div>
   <div class="kpis">
-    <div class="kpi"><div class="n" id="kTotal">763</div><div class="l">Registros filtrados</div></div>
-    <div class="kpi"><div class="n" id="kMapa">657</div><div class="l">En mapa</div></div>
-    <div class="kpi"><div class="n" id="kPub">592</div><div class="l">Publicidad</div></div>
+    <div class="kpi"><div class="n" id="kTotal">763</div><div class="l">Total filtrado</div></div>
+    <div class="kpi"><div class="n" id="kLonas">366</div><div class="l">Lonas</div></div>
+    <div class="kpi"><div class="n" id="kBardas">182</div><div class="l">Bardas</div></div>
+    <div class="kpi"><div class="n" id="kEspectaculares">40</div><div class="l">Espectaculares</div></div>
+    <div class="kpi"><div class="n" id="kMega">4</div><div class="l">Mega lonas</div></div>
     <div class="kpi"><div class="n" id="kLid">171</div><div class="l">Líderes</div></div>
-    <div class="kpi"><div class="n" id="kNoGeo">106</div><div class="l">Sin coordenadas</div></div>
   </div>
 </header>
 
@@ -151,7 +151,7 @@ tbody tr:hover{background:#f5f9fc;cursor:pointer}
 
   <section class="drawer">
     <div class="drawer-head">
-      <div class="drawer-title">Registros del filtro actual</div>
+      <div class="drawer-title">Registros mostrados</div>
       <div class="drawer-meta"><span id="tableCount">0</span> resultados · clic en una fila para ubicarla</div>
     </div>
     <div class="table-wrap">
@@ -279,16 +279,21 @@ function renderTable(items){
   document.getElementById("tableCount").textContent=items.length;
 }
 function updateKpis(items){
-  let pub=0,lid=0,mapn=0,nogeo=0;
+  let lonas=0,bardas=0,espectaculares=0,mega=0,lid=0;
   for(const {r} of items){
-    if(r._categoria==="LÍDER")lid++;else pub++;
-    if(hasCoord(r))mapn++;else nogeo++;
+    const t=subtype(r);
+    if(t==="LONA INDIVIDUAL")lonas++;
+    else if(t==="BARDA")bardas++;
+    else if(t==="ESPECTACULAR")espectaculares++;
+    else if(t==="MEGA LONA")mega++;
+    else if(t==="LÍDER")lid++;
   }
   document.getElementById("kTotal").textContent=items.length;
-  document.getElementById("kMapa").textContent=mapn;
-  document.getElementById("kPub").textContent=pub;
+  document.getElementById("kLonas").textContent=lonas;
+  document.getElementById("kBardas").textContent=bardas;
+  document.getElementById("kEspectaculares").textContent=espectaculares;
+  document.getElementById("kMega").textContent=mega;
   document.getElementById("kLid").textContent=lid;
-  document.getElementById("kNoGeo").textContent=nogeo;
 }
 function pointFeature(r,idx){
   return {
